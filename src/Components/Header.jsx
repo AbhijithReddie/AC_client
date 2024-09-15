@@ -32,25 +32,25 @@ const Header = () => {
       {/* Center: Navigation links */}
       <nav className="flex space-x-8">
         <a
-          href="#home"
+          href="home"
           className="text-lg font-medium text-dark-blue hover:text-teal-200 transition duration-300"
         >
           Home
         </a>
         <a
-          href="#dashboard"
+          href="dashboard"
           className="text-lg font-medium text-dark-blue hover:text-teal-200 transition duration-300"
         >
           DashBoard
         </a>
         <a
-          href="#about"
+          href="about"
           className="text-lg font-medium text-dark-blue hover:text-teal-200 transition duration-300"
         >
           About
         </a>
         <a
-          href="#contact"
+          href="contact"
           className="text-lg font-medium text-dark-blue hover:text-teal-200 transition duration-300"
         >
           Contact Us
@@ -60,13 +60,13 @@ const Header = () => {
       {/* Right side: Login and SignUp buttons */}
       <div className="flex space-x-4">
         <a
-          href="#login"
+          href="login"
           className="text-lg font-medium text-dark-blue border border-transparent px-4 py-2 rounded-md hover:bg-white hover:text-blue-500 transition duration-300"
         >
           Login
         </a>
         <a
-          href="#signup"
+          href="signup"
           className="text-lg font-medium text-white bg-teal-400 px-4 py-2 rounded-md hover:bg-teal-500 transition duration-300"
         >
           SignUp
