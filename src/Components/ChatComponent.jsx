@@ -8,16 +8,19 @@ const ChatComponent = ({ onBack }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [socket, setSocket] = useState(null);
+  const userName = localStorage.getItem('userName');
 
   useEffect(() => {
     // Create the socket connection
-    const socketIo = io('http://localhost:5000');
+    const socketIo = io('http://localhost:5000', {
+      transports: ['websocket'], // Force WebSocket only
+    });
     setSocket(socketIo);
 
-    // Fetch messages
+    // Fetch messages when the component mounts
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/chat/messages/${channelId}`);
+        const response = await axios.post(`http://localhost:5000/chat/messages/${channelId}`);
         setMessages(response.data);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -26,14 +29,14 @@ const ChatComponent = ({ onBack }) => {
     fetchMessages();
 
     // Join the room
-    socketIo.emit('join_room', { channelId });
+    socketIo.emit('join_room', { channelId: channelId });
 
     // Handle incoming messages
     socketIo.on('message', (message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
-    // Cleanup on unmount
+    // Cleanup on component unmount
     return () => {
       socketIo.disconnect();
     };
@@ -41,10 +44,20 @@ const ChatComponent = ({ onBack }) => {
 
   const handleSendMessage = () => {
     if (newMessage.trim() === '') return;
-    socket.emit('sendMessage', {
+
+    const message = {
+      sender: userName,
       channelId,
       content: newMessage,
-    });
+      timestamp: new Date().toISOString(), // Add timestamp manually
+    };
+
+    // Emit the message to the server
+    socket.emit('sendMessage', message);
+
+    // Update local state with the new message
+    setMessages((prevMessages) => [...prevMessages, message]);
+
     setNewMessage('');
   };
 
@@ -54,6 +67,7 @@ const ChatComponent = ({ onBack }) => {
       <div className="messages-list h-64 overflow-y-auto bg-gray-100 p-4 mb-4">
         {messages.map((message, index) => (
           <div key={index} className="message mb-2">
+            <div className="message-sender font-bold text-blue-600">{message.sender}</div> {/* Sender's name */}
             <div className="message-content text-sm text-gray-800">{message.content}</div>
             <div className="message-timestamp text-xs text-gray-500">{new Date(message.timestamp).toLocaleTimeString()}</div>
           </div>

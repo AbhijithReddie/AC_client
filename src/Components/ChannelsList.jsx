@@ -13,7 +13,7 @@ const ChannelsList = () => {
   useEffect(() => {
     const fetchChannels = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/chat/channels');
+        const response = await axios.post('http://localhost:5000/chat/channels');
         setChannels(response.data);
       } catch (err) {
         console.error(err);
@@ -29,7 +29,6 @@ const ChannelsList = () => {
   }, []);
 
   const handleChannelClick = (channelId) => {
-    socket.emit('join_room', { channelId });
     console.log(channelId);
     navigate(`/chat/${channelId}`);
   };
