@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import io from 'socket.io-client';
+import { useParams } from 'react-router-dom';
 
-function ChatComponent({ channelId, onBack }) {
+const ChatComponent = ({ onBack }) => {
+  const { channelId } = useParams();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  
-  // Fetch the messages when the component is mounted
+  const [socket, setSocket] = useState(null);
+
   useEffect(() => {
+    // Create the socket connection
+    const socketIo = io('http://localhost:5000');
+    setSocket(socketIo);
+
+    // Fetch messages
     const fetchMessages = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/chat/messages/${channelId}`);
@@ -16,22 +24,28 @@ function ChatComponent({ channelId, onBack }) {
       }
     };
     fetchMessages();
+
+    // Join the room
+    socketIo.emit('join_room', { channelId });
+
+    // Handle incoming messages
+    socketIo.on('message', (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socketIo.disconnect();
+    };
   }, [channelId]);
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = () => {
     if (newMessage.trim() === '') return;
-
-    try {
-      const response = await axios.post(`http://localhost:5000/chat/messages/${channelId}`, {
-        content: newMessage
-      });
-
-      // Update the local state with the new message
-      setMessages([...messages, response.data]);
-      setNewMessage('');
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
+    socket.emit('sendMessage', {
+      channelId,
+      content: newMessage,
+    });
+    setNewMessage('');
   };
 
   return (
@@ -74,6 +88,6 @@ function ChatComponent({ channelId, onBack }) {
       </button>
     </div>
   );
-}
+};
 
 export default ChatComponent;
