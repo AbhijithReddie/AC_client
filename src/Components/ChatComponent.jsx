@@ -40,7 +40,7 @@ const ChatComponent = ({ onBack }) => {
     return () => {
       socketIo.disconnect();
     };
-  }, [channelId]);
+  }, []);
 
   const handleSendMessage = () => {
     if (newMessage.trim() === '') return;
